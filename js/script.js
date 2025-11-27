@@ -43,24 +43,24 @@ document.addEventListener("click", function (e) {
 
 // Modal Box
 const itemDetailModal = document.querySelector("#item-detail-modal");
-const itemDetailButtons = document.querySelectorAll(".item-detail-button");
 
-itemDetailButtons.forEach((btn) => {
-  btn.onclick = (e) => {
-    itemDetailModal.style.display = "flex";
+// EVENT DELEGATION (karena tombol dibuat oleh Alpine)
+document.addEventListener("click", function (e) {
+  if (e.target.closest(".item-detail-btn")) {
     e.preventDefault();
-  };
+    itemDetailModal.style.display = "flex";
+  }
 });
 
-// klik tombol close
-document.querySelector(".modal .close-icon").onclick = (e) => {
-  itemDetailModal.style.display = "none";
+// Tombol close
+document.querySelector(".close-icon").addEventListener("click", function (e) {
   e.preventDefault();
-};
+  itemDetailModal.style.display = "none";
+});
 
-// klik di luar modal
-window.onclick = (e) => {
+// Klik di luar modal
+window.addEventListener("click", function (e) {
   if (e.target === itemDetailModal) {
     itemDetailModal.style.display = "none";
   }
-};
+});

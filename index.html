@@ -17,11 +17,20 @@ git branch -M main <!DOCTYPE html>
 
     <!-- My Style -->
     <link rel="stylesheet" href="css/style.css" />
+
+    <!-- AlpineJs -->
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.1/dist/cdn.min.js"
+    ></script>
+
+    <!-- App -->
+    <script src="src/app.js"></script>
   </head>
 
   <body>
     <!-- Navbar start -->
-    <nav class="navbar">
+    <nav class="navbar" x-data>
       <a href="#" class="navbar-logo">kacera<span>hijab</span></a>
 
       <div class="navbar-nav">
@@ -33,7 +42,14 @@ git branch -M main <!DOCTYPE html>
 
       <div class="navbar-extra">
         <a href="#" id="search-button"><i data-feather="search"></i></a>
-        <a href="#" id="shopping-cart-button"><i data-feather="shopping-cart"></i></a>
+        <a href="#" id="shopping-cart-button">
+          <i data-feather="shopping-cart"></i>
+          <span
+            class="quantity-badge"
+            x-show="$store.cart.quantity"
+            x-text="$store.cart.quantity"
+          ></span>
+        </a>
         <a href="#" id="menu"><i data-feather="menu"></i></a>
       </div>
 
@@ -45,35 +61,64 @@ git branch -M main <!DOCTYPE html>
       <!-- Search Form end -->
 
       <!-- Shopping Cart start -->
-       <div class="shopping-cart">
-        <div class="cart-item">
-          <img src="img/produk/pp.jpg" alt="Paris Premium">
-          <div class="item-detail">
-            <h3>Paris Premium</h3>
-            <div class="item-price">IDR 25K</div>
+      <div class="shopping-cart">
+        <template x-for="(item, index) in $store.cart.items" x-keys="index">
+          <div class="cart-item">
+            <img :src="`img/produk/${item.img}`" :alt="item.name" />
+            <div class="item-detail">
+              <h3 x-text="item.name"></h3>
+              <div class="item-price">
+                <span x-text="rupiah(item.price)"></span> &times;
+                <button id="remove" @click="$store.cart.remove(item.id)">
+                  &minus;
+                </button>
+                <span x-text="item.quantity"></span>
+                <button id="add" @click="$store.cart.add(item)">&plus;</button>
+                &equals;
+                <span x-text="rupiah(item.total)"></span>
+              </div>
+            </div>
           </div>
-          <i data-feather="trash-2" class="remove-item"></i>
-        </div>
-        <div class="cart-item">
-          <img src="img/produk/pp.jpg" alt="Paris Premium">
-          <div class="item-detail">
-            <h3>Paris Premium</h3>
-            <div class="item-price">IDR 25K</div>
-          </div>
-          <i data-feather="trash-2" class="remove-item"></i>
-        </div>
-        <div class="cart-item">
-          <img src="img/produk/pp.jpg" alt="Paris Premium">
-          <div class="item-detail">
-            <h3>Paris Premium</h3>
-            <div class="item-price">IDR 25K</div>
-          </div>
-          <i data-feather="trash-2" class="remove-item"></i>
-        </div>
-       </div>
-      <!-- Shopping Cart end -->
+        </template>
+        <h4 x-show="!$store.cart.items.length" style="margin-top: 1rem">
+          Keranjang Kosong
+        </h4>
+        <h4 x-show="$store.cart.items.length">
+          Total : <span x-text="rupiah($store.cart.total)"></span>
+        </h4>
 
+        <div class="form-container" x-show="$store.cart.items.length">
+          <form id="checkoutForm" x-data="{ name: '', email: '', phone: '' }">
+            <h5>Costumer Detail</h5>
+
+            <label for="name">
+              <span>Name</span>
+              <input type="text" id="name" x-model="name" required />
+            </label>
+
+            <label for="email">
+              <span>Email</span>
+              <input type="email" id="email" x-model="email" />
+            </label>
+
+            <label for="phone">
+              <span>Phone</span>
+              <input type="number" id="phone" x-model="phone" required />
+            </label>
+
+            <button class="checkout-button" type="submit">Checkout</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Total harga -->
+      <div class="cart-total">
+        Total: <span x-text="rupiah($store.cart.total)"></span>
+      </div>
+
+      <!-- Shopping Cart end -->
     </nav>
+
     <!-- Navbar end -->
 
     <!-- Hero Section start -->
@@ -122,7 +167,11 @@ git branch -M main <!DOCTYPE html>
     <!-- About Section end -->
 
     <!-- Product Section start -->
-    <section id="product" class="product">
+    <section
+      id="product"
+      class="product"
+      x-data="{ ...product(), selectedItem: null }"
+    >
       <h2><span>Produk</span> Kami</h2>
       <p>
         Temukan berbagai pilihan hijab cantik dengan bahan nyaman dan warna
@@ -130,84 +179,92 @@ git branch -M main <!DOCTYPE html>
       </p>
 
       <div class="row">
-        <div class="product-card">
-          <div class="product-icons">
-            <a href="#"><i data-feather="shopping-cart"></i></a>
-            <a href="#" class="item-detail-button"><i data-feather="eye"></i></a>
-        </div>
-          <div class="product-image">
-            <img src="img/produk/pp.jpg" alt="Paris Premium">
+        <template x-for="(item, index) in items" :key="index">
+          <div class="product-card">
+            <div class="product-icons">
+              <a href="#" @click.prevent="$store.cart.add(item)">
+                <svg
+                  width="24"
+                  height="24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <use href="js/feather-sprite.svg#shopping-cart"></use>
+                </svg>
+              </a>
+
+              <a
+                href="#"
+                class="item-detail-btn"
+                @click.prevent="
+   modalItem = { ...item };
+   showModal = true;
+"
+              >
+                <svg
+                  width="24"
+                  height="24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <use href="js/feather-sprite.svg#eye"></use>
+                </svg>
+              </a>
+            </div>
+
+            <div class="product-image">
+              <img :src="`img/produk/${item.img}`" :alt="item.name" />
+            </div>
+
+            <div class="product-content">
+              <h3 x-text="item.name"></h3>
+              <div class="product-price">
+                <span x-text="rupiah(item.price)"></span>
+              </div>
+            </div>
           </div>
-          <div class="product-content">
-            <h3> Paris Premium </h3>
-            <div class="product-price"> IDR 25K</div>
-          </div>
+        </template>
       </div>
-        <div class="product-card">
-          <div class="product-icons">
-            <a href="#"><i data-feather="shopping-cart"></i></a>
-            <a href="#" class="item-detail-button"><i data-feather="eye"></i></a>
+      <!-- Modal Box Item Detail start -->
+      <div
+        class="modal"
+        id="item-detail-modal"
+        x-show="showModal"
+        @click.self="showModal = false"
+        style="display: none"
+      >
+        <div class="modal-container">
+          <a href="#" class="close-icon" @click.prevent="showModal = false">
+            <i data-feather="x"></i>
+          </a>
+
+          <div class="modal-content">
+            <img :src="`img/produk/${modalItem.img}`" :alt="modalItem.name" />
+
+            <div class="product-content">
+              <h3 x-text="modalItem.name"></h3>
+
+              <!-- kalau ada deskripsi -->
+              <p x-text="modalItem.description ?? 'Tidak ada deskripsi.'"></p>
+
+              <div class="product-price" x-text="rupiah(modalItem.price)"></div>
+
+              <a href="#" @click.prevent="$store.cart.add(modalItem)">
+                <i data-feather="shopping-cart"></i>
+                <span>Masukkan keranjang</span>
+              </a>
+            </div>
+          </div>
         </div>
-          <div class="product-image">
-            <img src="img/produk/pp.jpg" alt="Paris Premium">
-          </div>
-          <div class="product-content">
-            <h3> Paris Jadul</h3>
-            <div class="product-price"> IDR 25K</div>
-          </div>
       </div>
-        <div class="product-card">
-          <div class="product-icons">
-            <a href="#"><i data-feather="shopping-cart"></i></a>
-            <a href="#" class="item-detail-button"><i data-feather="eye"></i></a>
-        </div>
-          <div class="product-image">
-            <img src="img/produk/pp.jpg" alt="Paris Premium">
-          </div>
-          <div class="product-content">
-            <h3> Paris Jadul</h3>
-            <div class="product-price"> IDR 25K</div>
-          </div>
-      </div>
-        <div class="product-card">
-          <div class="product-icons">
-            <a href="#"><i data-feather="shopping-cart"></i></a>
-            <a href="#" class="item-detail-button"><i data-feather="eye"></i></a>
-        </div>
-          <div class="product-image">
-            <img src="img/produk/pp.jpg" alt="Paris Premium">
-          </div>
-          <div class="product-content">
-            <h3> Paris Jadul</h3>
-            <div class="product-price"> IDR 25K</div>
-          </div>
-      </div>
-        <div class="product-card">
-          <div class="product-icons">
-            <a href="#"><i data-feather="shopping-cart"></i></a>
-            <a href="#" class="item-detail-button"><i data-feather="eye"></i></a>
-        </div>
-          <div class="product-image">
-            <img src="img/produk/pp.jpg" alt="Paris Premium">
-          </div>
-          <div class="product-content">
-            <h3> Paris Jadul</h3>
-            <div class="product-price"> IDR 25K</div>
-          </div>
-      </div>
-        <div class="product-card">
-          <div class="product-icons">
-            <a href="#"><i data-feather="shopping-cart"></i></a>
-            <a href="#" class="item-detail-button"><i data-feather="eye"></i></a>
-        </div>
-          <div class="product-image">
-            <img src="img/produk/pp.jpg" alt="Paris Premium">
-          </div>
-          <div class="product-content">
-            <h3> Paris Jadul</h3>
-            <div class="product-price"> IDR 25K</div>
-          </div>
-      </div>
+
+      <!-- Modal Box Item Detail end -->
     </section>
 
     <!-- Product Section end -->
@@ -230,21 +287,38 @@ git branch -M main <!DOCTYPE html>
           referrerpolicy="no-referrer-when-downgrade"
         ></iframe>
 
-        <form action="">
-          <div class="input-group">
-            <i data-feather="user"></i>
-            <input type="text" placeholder="nama" />
+        <div class="contact-info-box">
+          <h3>Hubungi Kami untuk Info Lebih Lanjut</h3>
+
+          <div class="info-item">
+            <span>📞 WhatsApp:</span>
+            <a href="https://wa.me/6283865643442" target="_blank">
+              +62 838-6564-3442
+            </a>
+
+            >
           </div>
-          <div class="input-group">
-            <i data-feather="mail"></i>
-            <input type="text" placeholder="email" />
+
+          <div class="info-item">
+            <span>📱 Instagram:</span>
+            <a href="https://instagram.com/kacera.hijab" target="_blank">
+              @kacera.hijab
+            </a>
           </div>
-          <div class="input-group">
-            <i data-feather="phone"></i>
-            <input type="text" placeholder="no hp" />
+
+          <div class="info-item">
+            <span>✉️ Email:</span>
+            <a href="kacerahijab@gmail.com">kacerahijab@gmail.com</a>
           </div>
-          <button type="submit" class="btn">kirim pesan</button>
-        </form>
+
+          <div class="info-item">
+            <span>📍 Alamat:</span>
+            <p>
+              Vila Batu Asri Blok G No.13, Jl. Lap Golf, Kp. Tengah, Kec. Pancur
+              Batu, Kabupaten Deli Serdang, Sumatera Utara
+            </p>
+          </div>
+        </div>
       </div>
     </section>
     <!-- Contact Section end -->
@@ -252,8 +326,15 @@ git branch -M main <!DOCTYPE html>
     <!-- Footer star -->
     <footer>
       <div class="socials">
-        <a href="#"><i data-feather="instagram"></i></a>
-        <a href="#"><i data-feather="message-circle"></i></a>
+        <a href="https://instagram.com/kacera.hijab" target="_blank">
+          <i data-feather="instagram"></i>
+        </a>
+        <a href="https://wa.me/62838365643442" target="_blank">
+          <i data-feather="message-circle"></i>
+        </a>
+        <a href="mailto:kacerahijab@gmail.com" target="_blank">
+          <i data-feather="mail"></i>
+        </a>
       </div>
 
       <div class="links">
@@ -269,23 +350,6 @@ git branch -M main <!DOCTYPE html>
     </footer>
     <!-- Footer end -->
 
-    <!-- Modal Box Item Detail start -->
-     <div class="modal" id="item-detail-modal">
-      <div class="modal-container">
-        <a href="#" class="close-icon"><i data-feather="x"></i></a>
-        <div class="modal-content">
-          <img src="img/produk/pp.jpg" alt="Paris Premium">
-          <div class="product-content">
-            <h3> Paris Premium </h3>
-            <p>Paris Premium adalah hijab berkualitas tinggi yang terbuat dari bahan lembut dan nyaman di kulit. Desainnya elegan dan mudah dipadupadankan dengan berbagai outfit. Tersedia dalam berbagai warna yang stylish, cocok untuk aktivitas sehari-hari maupun acara formal!</p>
-             <div class="product-price"> IDR 25K</div>
-             <a href="#"><i data-feather="shopping-cart"></i><span>masukkan keranjang</span></a>
-          </div>
-        </div>
-      </div>
-     </div>
-    <!-- Modal Box Item Detail end -->
-
     <!-- Feather Icons activate -->
     <script>
       feather.replace();
@@ -293,5 +357,58 @@ git branch -M main <!DOCTYPE html>
 
     <!-- My Javascript -->
     <script src="js/script.js"></script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const form = document.querySelector("#checkoutForm");
+
+        form.addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          // Ambil data customer
+          const name = form.querySelector("#name").value;
+          const email = form.querySelector("#email").value;
+          const phone = form.querySelector("#phone").value;
+
+          // Ambil data keranjang dari Alpine Store
+          const cartItems = Alpine.store("cart").items;
+          const total = Alpine.store("cart").total;
+
+          if (!cartItems.length) {
+            alert("Keranjang masih kosong!");
+            return;
+          }
+
+          // Format detail produk
+          let productList = "";
+          cartItems.forEach((item) => {
+            productList += `- ${item.name} (${
+              item.quantity
+            } x Rp ${item.price.toLocaleString()})%0A`;
+          });
+
+          // Nomor WhatsApp toko
+          const waNumber = "6283865643442";
+
+          // Format pesan
+          const message = `
+Halo Kak, saya ingin checkout.%0A
+%0A*DATA CUSTOMER:*%0A
+Nama: ${name}%0A
+Email: ${email}%0A
+Phone: ${phone}%0A
+%0A*DETAIL PESANAN:*%0A
+${productList}
+%0A*Total: Rp ${total.toLocaleString()}*%0A
+      `;
+
+          // Buat URL WhatsApp
+          const waURL = `https://wa.me/${waNumber}?text=${message}`;
+
+          // Redirect ke WhatsApp
+          window.open(waURL, "_blank");
+        });
+      });
+    </script>
   </body>
 </html>
