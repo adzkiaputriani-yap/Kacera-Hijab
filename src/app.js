@@ -55,6 +55,15 @@ document.addEventListener("alpine:init", () => {
   }));
 });
 
+document.addEventListener("DOMContentLoaded", () => {
+  // optional: delay sedikit jika perlu
+});
+
+document.querySelector("a.cta").addEventListener("click", (e) => {
+  e.preventDefault();
+  document.getElementById("product").scrollIntoView({ behavior: "smooth" });
+});
+
 document.addEventListener("alpine:init", () => {
   Alpine.store("cart", {
     items: [],
