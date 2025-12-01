@@ -1,4 +1,4 @@
-git branch -M main <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -17,15 +17,6 @@ git branch -M main <!DOCTYPE html>
 
     <!-- My Style -->
     <link rel="stylesheet" href="css/style.css" />
-
-    <!-- AlpineJs -->
-    <script
-      defer
-      src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.1/dist/cdn.min.js"
-    ></script>
-
-    <!-- App -->
-    <script src="src/app.js"></script>
   </head>
 
   <body>
@@ -160,11 +151,7 @@ git branch -M main <!DOCTYPE html>
     <!-- About Section end -->
 
     <!-- Product Section start -->
-    <section
-      id="product"
-      class="product"
-      x-data="{ ...product(), selectedItem: null }"
-    >
+    <section id="product" class="product" x-data="product">
       <h2><span>Produk</span> Kami</h2>
       <p>
         Temukan berbagai pilihan hijab cantik dengan bahan nyaman dan warna
@@ -238,7 +225,7 @@ git branch -M main <!DOCTYPE html>
           </a>
 
           <div class="modal-content">
-            <img :src="`img/produk/${modalItem.img}`" :alt="modalItem.name" />
+            <img x-show="modalItem.img" :src="`img/produk/${modalItem.img}`" />
 
             <div class="product-content">
               <h3 x-text="modalItem.name"></h3>
@@ -401,5 +388,14 @@ ${productList}
         });
       });
     </script>
+
+    <!-- AlpineJS -->
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.1/dist/cdn.min.js"
+    ></script>
+
+    <!-- app.js -->
+    <script src="src/app.js"></script>
   </body>
 </html>
