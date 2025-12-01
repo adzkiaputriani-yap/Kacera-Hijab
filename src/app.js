@@ -44,8 +44,8 @@ document.addEventListener("alpine:init", () => {
       {
         id: 6,
         name: "Segiempat Motif",
-        img: "hm.jpg",
-        price: 30000,
+        img: "jm.jpg",
+        price: 35000,
         description:
           "Segiempat Motif hadir dengan desain motif cantik yang memberikan sentuhan stylish dan unik pada penampilan. Terbuat dari bahan nyaman, tidak panas, dan mudah dibentuk. Ideal untuk kamu yang ingin tampil menonjol namun tetap elegan dalam setiap kesempatan.",
       },

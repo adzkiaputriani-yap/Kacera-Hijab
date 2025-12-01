@@ -286,13 +286,30 @@ body {
 }
 
 .hero .content p {
-  color: #ffeedd;
+  color: #fdf9f5;
   font-size: 1.6rem;
   margin-top: 1rem;
   line-height: 1.4;
   font-weight: 50;
   text-shadow: 1px 1px 3px rgba (255, 230, 201, 0.8);
   mix-blend-mode: difference;
+}
+
+/* Styling khusus tombol mulai belanja */
+.cta-btn,
+.cta-btn:visited,
+.cta-btn:active,
+.cta-btn:hover {
+  color: white !important;
+  text-decoration: none;
+}
+
+.cta-btn {
+  display: inline-block;
+  background: #70523a; /* atau warna yang kamu pakai */
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-weight: 600;
 }
 
 .hero .content .cta {
@@ -555,6 +572,10 @@ footer .creadit a {
   padding: 25px;
   border-radius: 14px;
   position: relative;
+}
+
+.close-icon {
+  color: #b47945 !important;
 }
 
 .modal-content .product-content {
