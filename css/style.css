@@ -266,7 +266,11 @@ body {
   border-radius: 20px;
   margin-top: 1.5rem;
   cursor: pointer;
-  display: inline-block; /* biar ikut rata kiri */
+
+  text-align: center;
+  display: block; /* dari inline-block → block */
+  margin-left: auto; /* biar ke tengah */
+  margin-right: auto;
 }
 
 /* Hero Section */
