@@ -157,7 +157,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const message =
       `*DETAIL ORDERAN*\n\n` +
       `Nama: ${name}\n` +
-      `Email: ${email}\n` +
+      `Alamat: ${address}\n` +
       `No WA: ${phone}\n\n` +
       `*Produk Yang Dipesan:*\n` +
       `${cartText}\n` +
